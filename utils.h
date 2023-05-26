@@ -12,13 +12,13 @@ extern std::string get_current_process();
 
 extern int run_sql(sqlite3* db, std::string sql, std::string marker);
 
-extern int get_appid_from_path(sqlite3* db, std::string processName);
+extern int get_appid_from_path(sqlite3* db, std::string fpath);
 
-extern int insert_focused_app_to_HourLog(sqlite3* db, std::string app, int time);
+extern int insert_focused_app_to_HourLog(sqlite3* db, std::string fpath, int time);
 
 // ------------------------------- 分组 Tab
 
-extern std::vector<int> get_all_category(sqlite3* db);
+extern std::vector<std::pair<int, std::string>> get_all_category(sqlite3* db);
 
 extern bool rename_category(sqlite3* db, int CategoryID, const std::string& new_name);
 

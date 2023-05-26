@@ -6,10 +6,6 @@
 #include "utils.h"
 
 
-
-
-
-
 // define global SQLite3 database connection
 sqlite3* db;
 int main()

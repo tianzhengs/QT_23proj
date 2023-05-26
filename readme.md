@@ -1,5 +1,25 @@
 - 设计：Screen Time App on Windows
 
+- 数据库使用sqlite3文件，包含两张表： 
+
+  - HourLog：记录每天的日期、时间（以分钟为单位）和应用程序。
+  
+    - date INTEGER(YYYYMMDDHH)
+    - time INTERER (in seconds)
+    - **app INTERER**
+  
+  - AppModels：记录应用程序的名称、文件和类别ID。
+  
+    - **app INTERER PRIMARY KEY**
+    - file NVARCHAR
+    - name NVARCHAR *默认从file中读入去除拓展名的文件名
+    - CategoryID int NULL DEFAULT 0
+  
+  - CategoryModels: 分类ID-名称对照
+  
+    - **CategoryID INTEGER PRIMARY KEY**
+    - name NVARCHAR 
+  
 - 界面部分：Tabs
 
   - 分组：用户可以将使用的软件进行分组，以便更好地管理和控制自己的应用程序。
@@ -23,25 +43,6 @@
 
 - 后台进程部分：
 
-  -  记录进程：每10秒获取Windows当前focus的窗口进程名，并将其记录到数据库中，以便用户可以更好地了解自己的应用程序使用情况。 数据库：
+  - 记录进程：每10秒获取Windows当前focus的窗口进程名，并将其记录到数据库中，以便用户可以更好地了解自己的应用程序使用情况。 数据库：
 
-  - 数据库使用sqlite3文件，包含两张表： 
-
-    - HourLog：记录每天的日期、时间（以分钟为单位）和应用程序。
-
-      - date INTEGER(YYYYMMDDHH)
-      - time INTERER (in minutes)
-      - app INTERER
-
-    - AppModels：记录应用程序的名称、文件和类别ID。
-
-      - app INTERER PRIMARY KEY
-      - file NVARCHAR
-      - CategoryID int NULL DEFAULT 0
-
-    - CategoryModels: 分类ID-名称对照
-      
-      - CategoryID INTEGER PRIMARY KEY
-      - name NVARCHAR
-      
-      
+    

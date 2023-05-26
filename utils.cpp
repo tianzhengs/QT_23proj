@@ -58,9 +58,9 @@ int run_sql(sqlite3* db, std::string sql, std::string marker)
     return SQLITE_OK;
 }
 
-int get_appid_from_path(sqlite3* db, std::string processName)
+int get_appid_from_path(sqlite3* db, std::string fpath)
 {
-    std::string query = "SELECT COUNT(*) FROM AppModels WHERE file='" + processName + "'";
+    std::string query = "SELECT COUNT(*) FROM AppModels WHERE file='" + fpath + "'";
     sqlite3_stmt* stmt;
     int result=0;
     if (sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, NULL) == SQLITE_OK)
@@ -80,23 +80,23 @@ int get_appid_from_path(sqlite3* db, std::string processName)
     }
 
     // get file name from file
-    size_t lastSeparator = processName.find_last_of("/\\");
+    size_t lastSeparator = fpath.find_last_of("/\\");
     
     // Find the position of the last dot (file extension)
-    size_t lastDot = processName.find_last_of(".");
+    size_t lastDot = fpath.find_last_of(".");
     
     // Extract the substring between the last separator and the last dot
-    std::string fileName = processName.substr(lastSeparator + 1, lastDot - lastSeparator - 1);
+    std::string fileName = fpath.substr(lastSeparator + 1, lastDot - lastSeparator - 1);
     
-    // if processName doesn't exist yet, insert into AppModels table
+    // if fpath doesn't exist yet, insert into AppModels table
     if (result == 0)
     {
-        query = "INSERT INTO AppModels (file,name) VALUES ('" + processName + "','" + fileName + "')";
+        query = "INSERT INTO AppModels (file,name) VALUES ('" + fpath + "','" + fileName + "')";
         if (run_sql(db, query, "")!= SQLITE_OK){return SQLITE_ERROR;}
     }
 
     // prepare SQLite3 statement to select app column from AppModels table
-    query = "SELECT app FROM AppModels WHERE file='" + processName + "'";
+    query = "SELECT app FROM AppModels WHERE file='" + fpath + "'";
     if (sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, NULL) == SQLITE_OK)
     {
         // execute statement
@@ -120,10 +120,11 @@ int get_appid_from_path(sqlite3* db, std::string processName)
     return result;
 }
 
-int insert_focused_app_to_HourLog(sqlite3* db, std::string app, int time)
+// time in seconds
+int insert_focused_app_to_HourLog(sqlite3* db, std::string fpath, int time)
 {
     // properly created if non-existent
-    int appid=get_appid_from_path(db, app);
+    int appid=get_appid_from_path(db, fpath);
 
     SYSTEMTIME st;
     GetLocalTime(&st);
@@ -166,11 +167,11 @@ int insert_focused_app_to_HourLog(sqlite3* db, std::string app, int time)
 
 // ------------------------------- 分组 Tab
 
-// Return a vector<int> containing all CategoryIDs from the CategoryModels table
-std::vector<int> get_all_category(sqlite3* db)
+// Return a vector<pair<int,string>> containing all CategoryIDs along with their names from the CategoryModels table
+std::vector<std::pair<int, std::string>> get_all_category(sqlite3* db)
 {
-    std::vector<int> category_ids;
-    std::string query = "SELECT CategoryID FROM CategoryModels";
+    std::vector<std::pair<int, std::string>> categories;
+    std::string query = "SELECT CategoryID, name FROM CategoryModels";
     sqlite3_stmt* stmt;
 
     if (sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, NULL) == SQLITE_OK)
@@ -178,19 +179,37 @@ std::vector<int> get_all_category(sqlite3* db)
         // Execute statement and loop through rows
         while (sqlite3_step(stmt) == SQLITE_ROW)
         {
-            int category_id = sqlite3_column_int(stmt, 0);
-            category_ids.push_back(category_id);
+            int categoryID = sqlite3_column_int(stmt, 0);
+            const unsigned char* categoryName = sqlite3_column_text(stmt, 1);
+            std::string categoryNameStr(reinterpret_cast<const char*>(categoryName));
+
+            categories.emplace_back(categoryID, categoryNameStr);
         }
         // Finalize statement
         sqlite3_finalize(stmt);
-        return category_ids;
     }
     else
     {
         std::cerr << "Error in SQLite3 query: " << sqlite3_errmsg(db) << std::endl;
-        return std::vector<int>(); // Return an empty vector on error
+        return std::vector<std::pair<int, std::string>>(); // Return an empty vector on error
     }
+
+    // If no categories found, insert default category
+    if (categories.empty())
+    {
+        int defaultCategoryID = 0;
+        std::string defaultCategoryName = "未分类";
+        categories.emplace_back(defaultCategoryID, defaultCategoryName);
+
+        std::string insertQuery = "INSERT INTO CategoryModels (CategoryID, name) VALUES (" + std::to_string(defaultCategoryID) + ", '" + defaultCategoryName + "')";
+        if (run_sql(db, insertQuery, "INSERT INTO CategoryModels") != SQLITE_OK)
+        {
+            std::cerr << "Error inserting default category: " << sqlite3_errmsg(db) << std::endl;
+        }
+    }
+
     
+    return categories;
 }
 
 // Rename a category in the CategoryModels table
