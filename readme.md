@@ -1,5 +1,10 @@
 - 设计：Screen Time App on Windows
 
+- TODO
+  界面
+  测试和Debug
+  提醒功能实装
+
 - 数据库使用sqlite3文件，包含两张表： 
 
   - HourLog：记录每天的日期、时间（以分钟为单位）和应用程序。
