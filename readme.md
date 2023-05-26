@@ -28,6 +28,8 @@
 - 界面部分：Tabs
 
   - 分组：用户可以将使用的软件进行分组，以便更好地管理和控制自己的应用程序。
+    
+    - struct Reminder (only used in returned value of get_all_category)
     - 分组
       - get_all_category
       - rename_category
@@ -46,10 +48,10 @@
 
   - 统计：用户可以选择指定的开始日期和结束日期，以显示在该时间段内使用软件的时长统计图，以便用户更好地了解自己的应用程序使用情况。
     - get_usage_app_timespan
-    
+
   - 时间轴：时间轴可以展示用户在指定日期内使用进程的时间轴，以便用户更好地了解自己的应用程序使用情况。
     - get_app_usage_timeline_day
-    
+
       
 
 - 后台进程部分：

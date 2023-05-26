@@ -4,15 +4,13 @@
 #include <vector>
 
 #include "sqlite3.h"
-
+#include "utils.h"
 
 // 表结构
 std::string createHourLog = "CREATE TABLE IF NOT EXISTS HourLog (date INTEGER, app INTERER, time INTEGER)";
 std::string createAppModels = "CREATE TABLE IF NOT EXISTS AppModels (app INTEGER PRIMARY KEY AUTOINCREMENT, file VARCHAR(255) UNIQUE, name nvarchar NULL DEFAULT '', CategoryID int NULL DEFAULT 0)";
-std::string createCategoryModels = "CREATE TABLE IF NOT EXISTS CategoryModels (CategoryID INTEGER PRIMARY KEY,name nvarchar NULL DEFAULT '')";
-
-
-
+std::string createCategoryModels = "CREATE TABLE IF NOT EXISTS CategoryModels (CategoryID INTEGER PRIMARY KEY AUTOINCREMENT,name nvarchar NULL DEFAULT '')";
+std::string createReminderModels = "CREATE TABLE IF NOT EXISTS ReminderModels (ReminderID INTEGER PRIMARY KEY AUTOINCREMENT,ReminderName NVARCHAR,ReminderBindCategory INT,ReminderTimeLimit INT,ReminderMessage NVARCHAR;";
 
 HMODULE hModule = LoadLibrary(TEXT("psapi.dll"));
 
@@ -167,7 +165,6 @@ int insert_focused_app_to_HourLog(sqlite3* db, std::string fpath, int time)
 
 // ------------------------------- 分组 Tab
 
-// Return a vector<pair<int,string>> containing all CategoryIDs along with their names from the CategoryModels table
 std::vector<std::pair<int, std::string>> get_all_category(sqlite3* db)
 {
     std::vector<std::pair<int, std::string>> categories;
@@ -212,7 +209,6 @@ std::vector<std::pair<int, std::string>> get_all_category(sqlite3* db)
     return categories;
 }
 
-// Rename a category in the CategoryModels table
 bool rename_category(sqlite3* db, int CategoryID, const std::string& new_name)
 {
     // Update the name for the given CategoryID in the CategoryModels table
@@ -225,7 +221,6 @@ bool rename_category(sqlite3* db, int CategoryID, const std::string& new_name)
     return true;
 }
 
-// Add a new category to the CategoryModels table
 bool add_category(sqlite3* db, const std::string& category_name)
 {
     // Insert the new category into the CategoryModels table
@@ -238,7 +233,6 @@ bool add_category(sqlite3* db, const std::string& category_name)
     return true;
 }
 
-// Delete a category from the CategoryModels table
 bool delete_category(sqlite3* db, int CategoryID)
 {
     // Update the CategoryID for all apps in the AppModels table that belong to the category being deleted
@@ -255,10 +249,10 @@ bool delete_category(sqlite3* db, int CategoryID)
         return false;
     }
 
+    
     return true;
 }
 
-// Get a vector of app names under a specific category
 std::vector<std::string> get_apps_under_category(sqlite3* db, int CategoryID)
 {
     std::vector<std::string> app_names;
@@ -284,7 +278,6 @@ std::vector<std::string> get_apps_under_category(sqlite3* db, int CategoryID)
     }
 }
 
-// Move an app to a specific category
 bool move_app_to_category(sqlite3* db, const std::string& app_name, int newCategoryId)
 {
     // Update the CategoryID for the app in the AppModels table
@@ -297,3 +290,178 @@ bool move_app_to_category(sqlite3* db, const std::string& app_name, int newCateg
     return true;
 }
 
+
+// ------------------------------- 提醒 Tab
+
+struct Reminder {
+    int reminderID;
+    std::string reminderName;
+    int reminderBindCategory;
+    int reminderTimeLimit;
+    std::string reminderMessage;
+};
+
+std::vector<Reminder> get_all_reminder(sqlite3* db) {
+    std::vector<Reminder> reminders;
+
+    std::string sql = "SELECT * FROM ReminderModels";
+    sqlite3_stmt* stmt;
+    int rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error preparing SQLite statement: " << sqlite3_errmsg(db) << std::endl;
+        return reminders;
+    }
+
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        Reminder reminder;
+        reminder.reminderID = sqlite3_column_int(stmt, 0);
+        reminder.reminderName = std::string(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1)));
+        reminder.reminderBindCategory = sqlite3_column_int(stmt, 2);
+        reminder.reminderTimeLimit = sqlite3_column_int(stmt, 3);
+        reminder.reminderMessage = std::string(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4)));
+
+        reminders.push_back(reminder);
+    }
+
+    sqlite3_finalize(stmt);
+
+    return reminders;
+}
+
+bool add_reminder(sqlite3* db, const std::string& name, int CategoryID, int timelimit, const std::string& message) {
+    std::string query = "INSERT INTO ReminderModels (ReminderName, ReminderBindCategory, ReminderTimeLimit, ReminderMessage) "
+                        "VALUES (?, ?, ?, ?);";
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
+        sqlite3_bind_text(stmt, 1, name.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_int(stmt, 2, CategoryID);
+        sqlite3_bind_int(stmt, 3, timelimit);
+        sqlite3_bind_text(stmt, 4, message.c_str(), -1, SQLITE_STATIC);
+
+        int result = sqlite3_step(stmt);
+        sqlite3_finalize(stmt);
+
+        return result == SQLITE_DONE;
+    }
+
+    return false;
+}
+
+bool remove_reminder(sqlite3* db, const std::string& name) {
+    std::string query = "DELETE FROM ReminderModels WHERE ReminderName = ?;";
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
+        sqlite3_bind_text(stmt, 1, name.c_str(), -1, SQLITE_STATIC);
+
+        int result = sqlite3_step(stmt);
+        sqlite3_finalize(stmt);
+
+        return result == SQLITE_DONE;
+    }
+
+    return false;
+}
+
+bool modify_reminder(sqlite3* db, const std::string& name, int CategoryID, int timelimit, const std::string& message) {
+    std::string query = "UPDATE ReminderModels SET ReminderBindCategory = ?, ReminderTimeLimit = ?, ReminderMessage = ? "
+                        "WHERE ReminderName = ?;";
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
+        sqlite3_bind_int(stmt, 1, CategoryID);
+        sqlite3_bind_int(stmt, 2, timelimit);
+        sqlite3_bind_text(stmt, 3, message.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 4, name.c_str(), -1, SQLITE_STATIC);
+
+        int result = sqlite3_step(stmt);
+        sqlite3_finalize(stmt);
+
+        return result == SQLITE_DONE;
+    }
+
+    return false;
+}
+
+
+
+// ------------------------------- 统计 Tab
+std::vector<std::pair<std::string, int>> get_usage_app_timespan(sqlite3* db, int start, int end)
+{
+    std::vector<std::pair<std::string, int>> appUsage;
+
+    std::string query = "SELECT AppModels.name, SUM(HourLog.time) FROM HourLog "
+                        "INNER JOIN AppModels ON HourLog.app = AppModels.app "
+                        "WHERE HourLog.date >= " + std::to_string(start) +
+                        " AND HourLog.date <= " + std::to_string(end) +
+                        " GROUP BY HourLog.app";
+
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, NULL) == SQLITE_OK)
+    {
+        while (sqlite3_step(stmt) == SQLITE_ROW)
+        {
+            const unsigned char* appName = sqlite3_column_text(stmt, 0);
+            int usageMinutes = sqlite3_column_int(stmt, 1)/60;
+            appUsage.push_back(std::make_pair(std::string(reinterpret_cast<const char*>(appName)), usageMinutes));
+        }
+        sqlite3_finalize(stmt);
+    }
+    else
+    {
+        std::cerr << "Error in SQLite3 query: " << sqlite3_errmsg(db) << std::endl;
+    }
+
+    return appUsage;
+}
+
+std::vector<std::pair<int, std::vector<std::pair<std::string, int>>>> get_app_usage_timeline_day(sqlite3* db)
+{
+    std::vector<std::pair<int, std::vector<std::pair<std::string, int>>>> timeline;
+
+    std::string query = "SELECT SUBSTR(CAST(HourLog.date AS TEXT), 9, 2), AppModels.name, SUM(HourLog.time) "
+                        "FROM HourLog "
+                        "JOIN AppModels ON HourLog.app = AppModels.app "
+                        "GROUP BY SUBSTR(CAST(HourLog.date AS TEXT), 9, 2), AppModels.name "
+                        "ORDER BY SUBSTR(CAST(HourLog.date AS TEXT), 9, 2)";
+
+    sqlite3_stmt* stmt;
+
+    if (sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, NULL) == SQLITE_OK)
+    {
+        int current_hour = -1;
+        std::vector<std::pair<std::string, int>> appUsage;
+
+        while (sqlite3_step(stmt) == SQLITE_ROW)
+        {
+            int hour = sqlite3_column_int(stmt, 0);
+            const unsigned char* app_name = sqlite3_column_text(stmt, 1);
+            int usage = sqlite3_column_int(stmt, 2);
+
+            if (hour != current_hour)
+            {
+                if (current_hour != -1)
+                {
+                    timeline.emplace_back(current_hour, appUsage);
+                    appUsage.clear();
+                }
+                current_hour = hour;
+            }
+
+            appUsage.emplace_back(reinterpret_cast<const char*>(app_name), usage/60);
+        }
+
+        // Add the last hour's data
+        if (!appUsage.empty())
+        {
+            timeline.emplace_back(current_hour, appUsage);
+        }
+
+        sqlite3_finalize(stmt);
+    }
+    else
+    {
+        std::cerr << "Error in SQLite3 query: " << sqlite3_errmsg(db) << std::endl;
+        return std::vector<std::pair<int, std::vector<std::pair<std::string, int>>>>();
+    }
+
+    return timeline;
+}

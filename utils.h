@@ -77,14 +77,23 @@ extern std::vector<std::string> get_apps_under_category(sqlite3* db, int Categor
 extern bool move_app_to_category(sqlite3* db, const std::string& app_name, int newCategoryId);
 
 // ------------------------------- 提醒 Tab
+struct Reminder;
+
+// struct Reminder {
+//     int reminderID;
+//     std::string reminderName;
+//     int reminderBindCategory;
+//     int reminderTimeLimit;
+//     std::string reminderMessage;
+// };
 
 /**
- * Retrieves the names of all reminders from the database.
+ * Retrieves all the reminder objects from the database.
  *
  * @param db The SQLite3 database connection.
- * @return A vector of reminder names.
+ * @return A vector of Reminder objects.
  */
-std::vector<std::string> get_all_reminder(sqlite3* db);
+std::vector<Reminder> get_all_reminder(sqlite3* db) ;
 
 /**
  * Adds a new reminder to the database.
@@ -118,7 +127,6 @@ bool remove_reminder(sqlite3* db, const std::string& name);
  * @return True if the reminder was modified successfully, false otherwise.
  */
 bool modify_reminder(sqlite3* db, const std::string& name, int CategoryID, int timelimit, const std::string& message);
-
 
 // ------------------------------- 统计 Tab
 
