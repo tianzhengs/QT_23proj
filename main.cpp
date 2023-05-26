@@ -26,13 +26,10 @@ int main()
     if (run_sql(db, createReminderModels, "creating ReminderModels")!= SQLITE_OK){std::cin >> x;}
 
     
-
     auto res = get_usage_app_timespan(db, 2023052601, 2023052624);
     for (auto i:res){
         std::cout << i.first << " " << i.second << std::endl;
     }
-
-
 
     std::vector<std::pair<int, std::vector<std::pair<std::string, int>>>> timeline = get_app_usage_timeline_day(db);
 
@@ -55,7 +52,6 @@ int main()
     }
 
 
-    int das = 12;
     // main loop to retrieve focused app info and insert into database
     while (1)
     {
@@ -75,5 +71,8 @@ int main()
 
     // close SQLite3 database connection
     sqlite3_close(db);
+
+    int waitKB;
+    std::cin >> waitKB;
     return 0;
 }

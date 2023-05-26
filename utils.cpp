@@ -10,7 +10,7 @@
 std::string createHourLog = "CREATE TABLE IF NOT EXISTS HourLog (date INTEGER, app INTERER, time INTEGER)";
 std::string createAppModels = "CREATE TABLE IF NOT EXISTS AppModels (app INTEGER PRIMARY KEY AUTOINCREMENT, file VARCHAR(255) UNIQUE, name nvarchar NULL DEFAULT '', CategoryID int NULL DEFAULT 0)";
 std::string createCategoryModels = "CREATE TABLE IF NOT EXISTS CategoryModels (CategoryID INTEGER PRIMARY KEY AUTOINCREMENT,name nvarchar NULL DEFAULT '')";
-std::string createReminderModels = "CREATE TABLE IF NOT EXISTS ReminderModels (ReminderID INTEGER PRIMARY KEY AUTOINCREMENT,ReminderName NVARCHAR,ReminderBindCategory INT,ReminderTimeLimit INT,ReminderMessage NVARCHAR;";
+std::string createReminderModels = "CREATE TABLE IF NOT EXISTS ReminderModels (ReminderID INTEGER PRIMARY KEY AUTOINCREMENT,ReminderName NVARCHAR,ReminderBindCategory INT,ReminderTimeLimit INT,ReminderMessage NVARCHAR)";
 
 HMODULE hModule = LoadLibrary(TEXT("psapi.dll"));
 
