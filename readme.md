@@ -1,9 +1,9 @@
 - 设计：Screen Time App on Windows
 
 - TODO
-  界面
-  测试和Debug
-  提醒功能实装
+  - 界面
+  - 测试和Debug
+  - 提醒功能实装
 
 - 数据库使用sqlite3文件，包含两张表： 
 
