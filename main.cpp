@@ -26,6 +26,7 @@ int main()
     if (run_sql(db, createReminderModels, "creating ReminderModels")!= SQLITE_OK){std::cin >> x;}
 
     
+    // -------------------------- TEST
     auto res = get_usage_app_timespan(db, 2023052601, 2023052624);
     for (auto i:res){
         std::cout << i.first << " " << i.second << std::endl;
@@ -51,6 +52,8 @@ int main()
         std::cout << std::endl;
     }
 
+    // -------------------------- TEST
+
 
     // main loop to retrieve focused app info and insert into database
     while (1)
@@ -66,6 +69,10 @@ int main()
         {
             std::cout << "Error!!" << std::endl;
         }
+
+        // reminder check
+        
+
         Sleep(1000*checkInterval);
     }
 
