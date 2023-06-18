@@ -85,6 +85,8 @@ struct Reminder {
     int reminderBindCategory;
     int reminderTimeLimit;
     std::string reminderMessage;
+    sqlite3 *db;
+    bool reached();
 };
 
 /**

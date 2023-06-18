@@ -2,6 +2,7 @@
 #include <windows.h>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #include "sqlite3.h"
 #include "utils.h"
@@ -293,7 +294,15 @@ bool move_app_to_category(sqlite3* db, const std::string& app_name, int newCateg
 
 // ------------------------------- 提醒 Tab
 
-
+// struct Reminder {
+//     int reminderID;
+//     std::string reminderName;
+//     int reminderBindCategory;
+//     int reminderTimeLimit;
+//     std::string reminderMessage;
+//     sqlite3 *db;
+//     bool reached();
+// };
 
 std::vector<Reminder> get_all_reminder(sqlite3* db) {
     std::vector<Reminder> reminders;
@@ -313,7 +322,7 @@ std::vector<Reminder> get_all_reminder(sqlite3* db) {
         reminder.reminderBindCategory = sqlite3_column_int(stmt, 2);
         reminder.reminderTimeLimit = sqlite3_column_int(stmt, 3);
         reminder.reminderMessage = std::string(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4)));
-
+        reminder.db = db;
         reminders.push_back(reminder);
     }
 
@@ -375,7 +384,28 @@ bool modify_reminder(sqlite3* db, const std::string& name, int CategoryID, int t
     return false;
 }
 
+bool Reminder::reached(){
+        SYSTEMTIME st;
+        GetLocalTime(&st);
+        int today_start_time = (st.wYear * 10000 + st.wMonth * 100 + st.wDay) * 100 + 0;
+        int today_end_time = (st.wYear * 10000 + st.wMonth * 100 + st.wDay) * 100 + 24;
 
+        // Calculate the sum of usage time of apps of the current bind category on the current day
+        int sumUsageTime = 0;
+        std::vector<std::string> apps_thiscat = get_apps_under_category(db, reminderBindCategory);
+        std::vector<std::pair<std::string, int>> appTimespan = get_usage_app_timespan(db, today_start_time, today_end_time);
+        for (const auto& app : appTimespan)
+        {
+            // Assuming the app name is stored in the reminderName member variable
+            if (std::find(apps_thiscat.begin(), apps_thiscat.end(), app.first) != apps_thiscat.end())
+            {
+                sumUsageTime += app.second;
+            }
+        }
+
+        // Compare the sum of usage time against the limit
+        return (sumUsageTime >= reminderTimeLimit);
+}
 
 // ------------------------------- 统计 Tab
 std::vector<std::pair<std::string, int>> get_usage_app_timespan(sqlite3* db, int start, int end)

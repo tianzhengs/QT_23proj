@@ -9,6 +9,7 @@
 #include <QSystemTrayIcon>
 #include <QMenu>
 #include <QAction>
+#include <QMessageBox>
 
 // define global SQLite3 database connection
 sqlite3* db;
@@ -37,7 +38,12 @@ public:
             }
 
             // reminder check
-
+            std::vector<Reminder> reminders = get_all_reminder(db);
+            for (Reminder reminder:reminders){
+                if (reminder.reached()){
+                    QMessageBox::information(nullptr, "Reminder", QString::fromStdString(reminder.reminderMessage));
+                }
+            }
             Sleep(1000 * checkInterval);
         }
     }
