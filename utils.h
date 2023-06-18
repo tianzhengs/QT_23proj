@@ -1,3 +1,5 @@
+#ifndef _utils_H_
+#define _utils_H_
 #include <string>
 #include <vector>
 
@@ -77,15 +79,13 @@ extern std::vector<std::string> get_apps_under_category(sqlite3* db, int Categor
 extern bool move_app_to_category(sqlite3* db, const std::string& app_name, int newCategoryId);
 
 // ------------------------------- 提醒 Tab
-struct Reminder;
-
-// struct Reminder {
-//     int reminderID;
-//     std::string reminderName;
-//     int reminderBindCategory;
-//     int reminderTimeLimit;
-//     std::string reminderMessage;
-// };
+struct Reminder {
+    int reminderID;
+    std::string reminderName;
+    int reminderBindCategory;
+    int reminderTimeLimit;
+    std::string reminderMessage;
+};
 
 /**
  * Retrieves all the reminder objects from the database.
@@ -147,3 +147,4 @@ std::vector<std::pair<std::string, int>> get_usage_app_timespan(sqlite3* db, int
  * @return A vector of pairs, where each pair contains the hour (0-23) and a vector of pairs representing the app name and its usage in minutes during that hour.
  */
 std::vector<std::pair<int, std::vector<std::pair<std::string, int>>>> get_app_usage_timeline_day(sqlite3* db);
+#endif

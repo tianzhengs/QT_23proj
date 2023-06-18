@@ -293,13 +293,7 @@ bool move_app_to_category(sqlite3* db, const std::string& app_name, int newCateg
 
 // ------------------------------- 提醒 Tab
 
-struct Reminder {
-    int reminderID;
-    std::string reminderName;
-    int reminderBindCategory;
-    int reminderTimeLimit;
-    std::string reminderMessage;
-};
+
 
 std::vector<Reminder> get_all_reminder(sqlite3* db) {
     std::vector<Reminder> reminders;

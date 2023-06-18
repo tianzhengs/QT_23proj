@@ -1,85 +1,81 @@
+#include "mainwindow.h"
+#include "utils.h"
+#include <QApplication>
 #include <iostream>
 #include <string>
 #include <windows.h>
-
 #include "sqlite3.h"
-#include "utils.h"
-
+#include <QThread>
 
 // define global SQLite3 database connection
 sqlite3* db;
-int main()
+
+// WorkerThread 类用于在单独的线程中运行循环逻辑
+class WorkerThread : public QThread
 {
-    int checkInterval = 1;
-    int x;
+public:
+    void run() override
+    {
+        int checkInterval = 1;
+
+        // main loop to retrieve focused app info and insert into database
+        while (1)
+        {
+            std::string current_process = get_current_process();
+            if (!current_process.empty())
+            {
+                std::cout << current_process << std::endl;
+                // insert focused app data into HourLog table
+                insert_focused_app_to_HourLog(db, current_process, checkInterval);
+            }
+            else
+            {
+                std::cout << "Error!!" << std::endl;
+            }
+
+            // reminder check
+
+            Sleep(1000 * checkInterval);
+        }
+    }
+};
+
+int main(int argc, char *argv[])
+{
     // open SQLite3 database connection and create tables if necessary
     int rc = sqlite3_open("data.db", &db);
     if (rc != SQLITE_OK)
     {
         std::cerr << "Error opening SQLite3 database: " << sqlite3_errmsg(db) << std::endl;
-        std::cin >> x;
+        return 1;
     }
 
-    if (run_sql(db, createHourLog, "creating HourLog")!= SQLITE_OK){std::cin >> x;}
-    if (run_sql(db, createAppModels, "creating AppModels")!= SQLITE_OK){std::cin >> x;}
-    if (run_sql(db, createCategoryModels, "creating CategoryModels")!= SQLITE_OK){std::cin >> x;}
-    if (run_sql(db, createReminderModels, "creating ReminderModels")!= SQLITE_OK){std::cin >> x;}
+    if (run_sql(db, createHourLog, "creating HourLog") != SQLITE_OK)
+        return 1;
+    if (run_sql(db, createAppModels, "creating AppModels") != SQLITE_OK)
+        return 1;
+    if (run_sql(db, createCategoryModels, "creating CategoryModels") != SQLITE_OK)
+        return 1;
+    if (run_sql(db, createReminderModels, "creating ReminderModels") != SQLITE_OK)
+        return 1;
 
-    
-    // -------------------------- TEST
-    auto res = get_usage_app_timespan(db, 2023052601, 2023052624);
-    for (auto i:res){
-        std::cout << i.first << " " << i.second << std::endl;
-    }
+    QApplication a(argc, argv);
+    MainWindow w(db);
+    w.show();
 
-    std::vector<std::pair<int, std::vector<std::pair<std::string, int>>>> timeline = get_app_usage_timeline_day(db);
+    // 创建 WorkerThread 实例并启动线程
+    WorkerThread workerThread;
+    workerThread.start();
 
-    for (const auto& hourData : timeline)
-    {
-        int hour = hourData.first;
-        const std::vector<std::pair<std::string, int>>& appUsage = hourData.second;
+    // 进入 Qt 事件循环
+    int result = a.exec();
 
-        std::cout << "Hour: " << hour << std::endl;
-        
-        for (const auto& app : appUsage)
-        {
-            std::string appName = app.first;
-            int usage = app.second;
-
-            std::cout << "App: " << appName << ", Usage: " << usage << " minutes" << std::endl;
-        }
-
-        std::cout << std::endl;
-    }
-
-    // -------------------------- TEST
-
-
-    // main loop to retrieve focused app info and insert into database
-    while (1)
-    {
-        std::string current_process = get_current_process();
-        if (!current_process.empty())
-        {
-            std::cout << current_process << std::endl;
-            // insert focused app data into HourLog table
-            insert_focused_app_to_HourLog(db, current_process, checkInterval);
-        }
-        else
-        {
-            std::cout << "Error!!" << std::endl;
-        }
-
-        // reminder check
-        
-
-        Sleep(1000*checkInterval);
-    }
+    // 等待 workerThread 完成并退出
+    workerThread.quit();
+    workerThread.wait();
 
     // close SQLite3 database connection
     sqlite3_close(db);
 
-    int waitKB;
-    std::cin >> waitKB;
-    return 0;
+    return result;
 }
