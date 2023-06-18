@@ -48,6 +48,7 @@ public:
     void dragMoveEvent(QDragMoveEvent* event);
     void dragEnterEvent(QDragEnterEvent* event);
     void dropEvent(QDropEvent* event);
+    void closeEvent(QCloseEvent *event) override;
     void createTimeline();
 
 private:

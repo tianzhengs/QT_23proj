@@ -6,6 +6,9 @@
 #include <windows.h>
 #include "sqlite3.h"
 #include <QThread>
+#include <QSystemTrayIcon>
+#include <QMenu>
+#include <QAction>
 
 // define global SQLite3 database connection
 sqlite3* db;
@@ -61,7 +64,17 @@ int main(int argc, char *argv[])
 
     QApplication a(argc, argv);
     MainWindow w(db);
-    w.show();
+    w.show(); 
+
+
+    // 托盘图标右键菜单,实现退出
+    QSystemTrayIcon trayIcon(QIcon::fromTheme("applications-engineering"));
+    trayIcon.show();
+    QMenu menu;
+    QAction *exitAction = menu.addAction("退出");
+    QObject::connect(exitAction, &QAction::triggered, &app, &QApplication::quit);
+    trayIcon.setContextMenu(&menu);
+
 
     // 创建 WorkerThread 实例并启动线程
     WorkerThread workerThread;

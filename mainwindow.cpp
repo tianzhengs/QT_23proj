@@ -267,6 +267,13 @@ void MainWindow::dropEvent(QDropEvent* event)
         event->acceptProposedAction();
     }
 }
+
+void MainWindow::closeEvent(QCloseEvent *event) override
+{
+    event->ignore(); // Ignore the close event
+    hide(); // Hide the window instead of closing it
+}
+
 void MainWindow::createTimeline()
 {
     // Create the QGraphicsView and QGraphicsScene
