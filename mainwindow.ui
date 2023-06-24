@@ -19,20 +19,102 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>521</width>
-      <height>331</height>
+      <width>771</width>
+      <height>541</height>
      </rect>
     </property>
     <property name="tabPosition">
      <enum>QTabWidget::West</enum>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tab">
      <attribute name="title">
       <string>统计</string>
      </attribute>
+     <widget class="QDateEdit" name="dateEdit">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>10</y>
+        <width>161</width>
+        <height>21</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QDateEdit" name="dateEdit_2">
+      <property name="geometry">
+       <rect>
+        <x>430</x>
+        <y>10</y>
+        <width>151</width>
+        <height>21</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_3">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>10</y>
+        <width>91</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>13</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>start time</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_4">
+      <property name="geometry">
+       <rect>
+        <x>320</x>
+        <y>10</y>
+        <width>91</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>13</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>end time</string>
+      </property>
+     </widget>
+     <widget class="QTreeWidget" name="time">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>40</y>
+        <width>711</width>
+        <height>471</height>
+       </rect>
+      </property>
+      <property name="allColumnsShowFocus">
+       <bool>false</bool>
+      </property>
+      <property name="columnCount">
+       <number>2</number>
+      </property>
+      <column>
+       <property name="text">
+        <string notr="true">1</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string notr="true">2</string>
+       </property>
+      </column>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab_2">
      <attribute name="title">
@@ -63,22 +145,22 @@
         </property>
         <column>
          <property name="text">
-          <string notr="true">1</string>
+          <string notr="true">Name</string>
          </property>
         </column>
         <column>
          <property name="text">
-          <string notr="true">2</string>
+          <string notr="true">BindCategory</string>
          </property>
         </column>
         <column>
          <property name="text">
-          <string notr="true">3</string>
+          <string notr="true">TimeLimit</string>
          </property>
         </column>
         <column>
          <property name="text">
-          <string notr="true">4</string>
+          <string notr="true">Message</string>
          </property>
         </column>
        </widget>
@@ -108,8 +190,8 @@
        <rect>
         <x>10</x>
         <y>10</y>
-        <width>451</width>
-        <height>281</height>
+        <width>721</width>
+        <height>511</height>
        </rect>
       </property>
      </widget>
@@ -159,7 +241,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>19</height>
+     <height>17</height>
     </rect>
    </property>
   </widget>

@@ -80,13 +80,13 @@ int get_appid_from_path(sqlite3* db, std::string fpath)
 
     // get file name from file
     size_t lastSeparator = fpath.find_last_of("/\\");
-    
+
     // Find the position of the last dot (file extension)
     size_t lastDot = fpath.find_last_of(".");
-    
+
     // Extract the substring between the last separator and the last dot
     std::string fileName = fpath.substr(lastSeparator + 1, lastDot - lastSeparator - 1);
-    
+
     // if fpath doesn't exist yet, insert into AppModels table
     if (result == 0)
     {
@@ -154,14 +154,14 @@ int insert_focused_app_to_HourLog(sqlite3* db, std::string fpath, int time)
         return SQLITE_OK;
     }
     else
-    {   
+    {
         std::string new_time = std::to_string(already_time + time);
         query = "UPDATE HourLog SET time = " + new_time + " WHERE date = " + std::to_string(date) + " AND app = " + std::to_string(appid);
         if (run_sql(db, query, "UPDATE HourLog")!= SQLITE_OK){return SQLITE_ERROR;}
         return SQLITE_OK;
     }
     return SQLITE_ERROR;
-    
+
 }
 
 // ------------------------------- 分组 Tab
@@ -180,7 +180,7 @@ std::vector<std::pair<int, std::string>> get_all_category(sqlite3* db)
             int categoryID = sqlite3_column_int(stmt, 0);
             const unsigned char* categoryName = sqlite3_column_text(stmt, 1);
             std::string categoryNameStr(reinterpret_cast<const char*>(categoryName));
-
+            //std::cerr<<"id: "<<categoryID<<std::endl;
             categories.emplace_back(categoryID, categoryNameStr);
         }
         // Finalize statement
@@ -206,7 +206,7 @@ std::vector<std::pair<int, std::string>> get_all_category(sqlite3* db)
         }
     }
 
-    
+
     return categories;
 }
 
@@ -250,7 +250,7 @@ bool delete_category(sqlite3* db, int CategoryID)
         return false;
     }
 
-    
+
     return true;
 }
 
@@ -282,7 +282,7 @@ std::vector<std::string> get_apps_under_category(sqlite3* db, int CategoryID)
 bool move_app_to_category(sqlite3* db, const std::string& app_name, int newCategoryId)
 {
     // Update the CategoryID for the app in the AppModels table
-    std::string query = "UPDATE AppModels SET CategoryID = " + std::to_string(newCategoryId) + " WHERE name = " + app_name;
+    std::string query = "UPDATE AppModels SET CategoryID = " + std::to_string(newCategoryId) + " WHERE name = '" + app_name + "'";
     if (run_sql(db, query, "UPDATE AppModels") != SQLITE_OK)
     {
         return false;
@@ -385,26 +385,29 @@ bool modify_reminder(sqlite3* db, const std::string& name, int CategoryID, int t
 }
 
 bool Reminder::reached(){
-        SYSTEMTIME st;
-        GetLocalTime(&st);
-        int today_start_time = (st.wYear * 10000 + st.wMonth * 100 + st.wDay) * 100 + 0;
-        int today_end_time = (st.wYear * 10000 + st.wMonth * 100 + st.wDay) * 100 + 24;
+    SYSTEMTIME st;
+    GetLocalTime(&st);
+    int today_start_time = (st.wYear * 10000 + st.wMonth * 100 + st.wDay) * 100 + 0;
+    int today_end_time = (st.wYear * 10000 + st.wMonth * 100 + st.wDay) * 100 + 24;
 
-        // Calculate the sum of usage time of apps of the current bind category on the current day
-        int sumUsageTime = 0;
-        std::vector<std::string> apps_thiscat = get_apps_under_category(db, reminderBindCategory);
-        std::vector<std::pair<std::string, int>> appTimespan = get_usage_app_timespan(db, today_start_time, today_end_time);
-        for (const auto& app : appTimespan)
+    // Calculate the sum of usage time of apps of the current bind category on the current day
+    int sumUsageTime = 0;
+    std::vector<std::string> apps_thiscat = get_apps_under_category(db, reminderBindCategory);
+    std::vector<std::pair<std::string, int>> appTimespan = get_usage_app_timespan(db, today_start_time, today_end_time);
+    //std::cerr<<"category_size: "<<apps_thiscat.size()<<std::endl;
+    for (const auto& app : appTimespan)
+    {
+        // Assuming the app name is stored in the reminderName member variable
+        //std::cerr<<"find: "<<(std::find(apps_thiscat.begin(), apps_thiscat.end(), app.first) != apps_thiscat.end())<<std::endl;
+        if (std::find(apps_thiscat.begin(), apps_thiscat.end(), app.first) != apps_thiscat.end())
         {
-            // Assuming the app name is stored in the reminderName member variable
-            if (std::find(apps_thiscat.begin(), apps_thiscat.end(), app.first) != apps_thiscat.end())
-            {
-                sumUsageTime += app.second;
-            }
+            //std::cerr<<app.second<<std::endl;
+            sumUsageTime += app.second;
         }
+    }
 
-        // Compare the sum of usage time against the limit
-        return (sumUsageTime >= reminderTimeLimit);
+    // Compare the sum of usage time against the limit
+    return (sumUsageTime >= reminderTimeLimit);
 }
 
 // ------------------------------- 统计 Tab
@@ -417,7 +420,6 @@ std::vector<std::pair<std::string, int>> get_usage_app_timespan(sqlite3* db, int
                         "WHERE HourLog.date >= " + std::to_string(start) +
                         " AND HourLog.date <= " + std::to_string(end) +
                         " GROUP BY HourLog.app";
-
     sqlite3_stmt* stmt;
     if (sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, NULL) == SQLITE_OK)
     {

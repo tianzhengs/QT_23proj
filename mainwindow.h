@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+#include "qmimedata.h"
 #include <QTreeWidget>
+#include <QCloseEvent>
 #include <QMainWindow>
 #include <myaddcategory.h>
 #include <utils.h>
@@ -21,9 +23,11 @@ class MainWindow : public QMainWindow
 
 public:
     MainWindow(sqlite3* connection,QWidget *parent = nullptr);
+    typedef std::vector<std::pair<int, std::vector<std::pair<std::string, int>>>> TimelineData;
     void displayReminders();
     void initTreeWidget();
-
+    void createTimeline();
+    void createtimesum();
     ~MainWindow();
 
 
@@ -42,14 +46,18 @@ private slots:
 
     void on_CategoryList_doubleClicked(const QModelIndex &index);
 
+    void onAppItemDoubleClicked(QTreeWidgetItem* item, int column);
 
+
+    void on_dateEdit_userDateChanged(const QDate &date);
+
+    void on_dateEdit_2_userDateChanged(const QDate &date);
 
 public:
-    void dragMoveEvent(QDragMoveEvent* event);
-    void dragEnterEvent(QDragEnterEvent* event);
-    void dropEvent(QDropEvent* event);
     void closeEvent(QCloseEvent *event) override;
-    void createTimeline();
+    QTreeWidgetItem* selectedAppItem;
+
+    void updateTimeline(const TimelineData& timelineData);
 
 private:
     Ui::MainWindow *ui;
@@ -57,6 +65,7 @@ private:
     MyAddReminder newreminder;
     QTreeWidget* treeWidget;
     QGraphicsView* timelineView;
+    QTreeWidgetItem* selectedItem;
     QGraphicsScene* timelineScene;
     MyDeleteReminder newdeletereminder;
     QSqlQuery sql;

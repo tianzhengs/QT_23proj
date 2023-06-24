@@ -43,6 +43,11 @@
      <height>16</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>7</pointsize>
+    </font>
+   </property>
    <property name="text">
     <string>Reminder Name</string>
    </property>
@@ -82,6 +87,11 @@
      <height>16</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>7</pointsize>
+    </font>
+   </property>
    <property name="text">
     <string>Reminder BindCategory</string>
    </property>
@@ -95,6 +105,11 @@
      <height>12</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>7</pointsize>
+    </font>
+   </property>
    <property name="text">
     <string>Reminder TimeLimit</string>
    </property>
@@ -107,6 +122,11 @@
      <width>120</width>
      <height>12</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>7</pointsize>
+    </font>
    </property>
    <property name="text">
     <string>Reminder Message</string>
