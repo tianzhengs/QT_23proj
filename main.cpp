@@ -5,11 +5,13 @@
 #include <string>
 #include <windows.h>
 #include "sqlite3.h"
+#include <QObject>
 #include <QThread>
 #include <QSystemTrayIcon>
 #include <QMenu>
 #include <QAction>
 #include <QMessageBox>
+#include <QMetaType>
 
 sqlite3* db;
 
@@ -17,7 +19,10 @@ std::vector<std::string> reminder_executed;
 // WorkerThread 类用于在单独的线程中运行循环逻辑
 class WorkerThread : public QThread
 {
+    Q_OBJECT
+
 public:
+
     void run() override
     {
         int checkInterval = 1;
@@ -34,17 +39,19 @@ public:
             }
             else
             {
-                std::cout << "Error!!" << std::endl;
+                std::cout << "1Error!!" << std::endl;
             }
 
             // reminder check
             std::vector<Reminder> reminders = get_all_reminder(db);
             for (Reminder reminder:reminders){
                 //std::cerr<<reminder.reminderTimeLimit()<<std::endl;
-                if (reminder.reached()) {
-                    if (std::find(reminder_executed.begin(), reminder_executed.end(), reminder.reminderName) == reminder_executed.end()){
-                        QMessageBox::information(nullptr, "Reminder", QString::fromStdString(reminder.reminderMessage));
+                if (std::find(reminder_executed.begin(), reminder_executed.end(), reminder.reminderName) == reminder_executed.end()) {
+                    if (reminder.reached()){
+                        emit messageReceived(reminder.reminderMessage);
+                        //QMessageBox::information(nullptr, "Reminder", QString::fromStdString(reminder.reminderMessage));
                         reminder_executed.push_back(reminder.reminderName);
+                        //reminder.reminderTimeLimit=999999999;
                     }
 
                 }
@@ -52,7 +59,12 @@ public:
             Sleep(1000 * checkInterval);
         }
     }
+
+signals:
+    void messageReceived(std::string message);
 };
+
+#include "main.moc"
 
 int main(int argc, char *argv[])
 {
@@ -90,6 +102,7 @@ int main(int argc, char *argv[])
 
     // 创建 WorkerThread 实例并启动线程
     WorkerThread workerThread;
+    QObject::connect(&workerThread, &WorkerThread::messageReceived, &w, &MainWindow::handleMessage);
     workerThread.start();
 
     int result = a.exec();

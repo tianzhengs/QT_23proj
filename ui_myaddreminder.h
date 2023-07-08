@@ -11,6 +11,7 @@
 
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
+#include <QtWidgets/QComboBox>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QPushButton>
@@ -28,9 +29,9 @@ public:
     QLabel *label_2;
     QLabel *label_3;
     QLabel *label_4;
-    QLineEdit *lineEdit_2;
     QLineEdit *lineEdit_3;
     QLineEdit *lineEdit_4;
+    QComboBox *comboBox;
 
     void setupUi(QWidget *MyAddReminder)
     {
@@ -53,6 +54,7 @@ public:
         lineEdit = new QLineEdit(MyAddReminder);
         lineEdit->setObjectName("lineEdit");
         lineEdit->setGeometry(QRect(140, 50, 113, 22));
+        lineEdit->setAutoFillBackground(false);
         label_2 = new QLabel(MyAddReminder);
         label_2->setObjectName("label_2");
         label_2->setGeometry(QRect(30, 90, 120, 16));
@@ -65,15 +67,16 @@ public:
         label_4->setObjectName("label_4");
         label_4->setGeometry(QRect(30, 170, 120, 12));
         label_4->setFont(font);
-        lineEdit_2 = new QLineEdit(MyAddReminder);
-        lineEdit_2->setObjectName("lineEdit_2");
-        lineEdit_2->setGeometry(QRect(140, 90, 113, 20));
         lineEdit_3 = new QLineEdit(MyAddReminder);
         lineEdit_3->setObjectName("lineEdit_3");
         lineEdit_3->setGeometry(QRect(140, 130, 113, 20));
+        lineEdit_3->setAutoFillBackground(false);
         lineEdit_4 = new QLineEdit(MyAddReminder);
         lineEdit_4->setObjectName("lineEdit_4");
         lineEdit_4->setGeometry(QRect(140, 170, 113, 20));
+        comboBox = new QComboBox(MyAddReminder);
+        comboBox->setObjectName("comboBox");
+        comboBox->setGeometry(QRect(140, 90, 111, 22));
 
         retranslateUi(MyAddReminder);
 
@@ -93,6 +96,8 @@ public:
         label_2->setText(QCoreApplication::translate("MyAddReminder", "Reminder BindCategory", nullptr));
         label_3->setText(QCoreApplication::translate("MyAddReminder", "Reminder TimeLimit", nullptr));
         label_4->setText(QCoreApplication::translate("MyAddReminder", "Reminder Message", nullptr));
+        lineEdit_3->setPlaceholderText(QCoreApplication::translate("MyAddReminder", "\350\257\267\350\276\223\345\205\245", nullptr));
+        lineEdit_4->setPlaceholderText(QCoreApplication::translate("MyAddReminder", "\350\257\267\350\276\223\345\205\245", nullptr));
     } // retranslateUi
 
 };

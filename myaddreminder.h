@@ -16,9 +16,13 @@ class MyAddReminder : public QWidget
 public:
     explicit MyAddReminder(sqlite3* connection,QWidget *parent = nullptr);
     ~MyAddReminder();
+signals:
+    void messageReceived();
 
 private slots:
     void on_pushButton_clicked();
+
+    void showEvent(QShowEvent *event) override;
 
     void on_pushButton_2_clicked();
 

@@ -425,8 +425,11 @@ std::vector<std::pair<std::string, int>> get_usage_app_timespan(sqlite3* db, int
     {
         while (sqlite3_step(stmt) == SQLITE_ROW)
         {
+            //std::cerr<<"success 1"<<std::endl;
             const unsigned char* appName = sqlite3_column_text(stmt, 0);
+            //std::cerr<<std::string(reinterpret_cast<const char*>(appName))<<std::endl;
             int usageMinutes = sqlite3_column_int(stmt, 1)/60;
+            //std::cerr<<usageMinutes<<std::endl;
             appUsage.push_back(std::make_pair(std::string(reinterpret_cast<const char*>(appName)), usageMinutes));
         }
         sqlite3_finalize(stmt);
@@ -435,7 +438,8 @@ std::vector<std::pair<std::string, int>> get_usage_app_timespan(sqlite3* db, int
     {
         std::cerr << "Error in SQLite3 query: " << sqlite3_errmsg(db) << std::endl;
     }
-
+    //if(!appUsage.empty()) std::cerr<<"not empty"<<std::endl;
+    //else std::cerr<<"get empty"<<std::endl;
     return appUsage;
 }
 

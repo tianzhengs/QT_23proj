@@ -4,14 +4,12 @@
 #include <QTreeWidget>
 #include <QCloseEvent>
 #include <QMainWindow>
-#include <myaddcategory.h>
 #include <utils.h>
 #include <QSqlDatabase>
 #include <QGraphicsView>
 #include <QGraphicsScene>
 #include <QSqlQuery>
 #include <myaddreminder.h>
-#include <mydeletereminder.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -28,6 +26,13 @@ public:
     void initTreeWidget();
     void createTimeline();
     void createtimesum();
+    void drawBarChart(int start,int end);
+    void handleMessage(std::string message);
+    void handleAction1();
+    void handleAction2();
+    void handleAction3();
+    void init();
+
     ~MainWindow();
 
 
@@ -48,14 +53,17 @@ private slots:
 
     void onAppItemDoubleClicked(QTreeWidgetItem* item, int column);
 
+    void handleWindowClosed();
 
     void on_dateEdit_userDateChanged(const QDate &date);
 
     void on_dateEdit_2_userDateChanged(const QDate &date);
 
+
 public:
     void closeEvent(QCloseEvent *event) override;
     QTreeWidgetItem* selectedAppItem;
+    std::string delete_name;
 
     void updateTimeline(const TimelineData& timelineData);
 
@@ -67,7 +75,8 @@ private:
     QGraphicsView* timelineView;
     QTreeWidgetItem* selectedItem;
     QGraphicsScene* timelineScene;
-    MyDeleteReminder newdeletereminder;
+    QGraphicsView* timesumView;
+    QGraphicsScene* timesumScene;
     QSqlQuery sql;
 };
 #endif // MAINWINDOW_H
